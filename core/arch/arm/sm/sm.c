@@ -98,5 +98,8 @@ uint32_t sm_from_nsec(struct sm_ctx *ctx)
 	else
 		ctx->sec.mon_lr = (uint32_t)vector_std_smc_entry;
 
+	uint32_t r_temp;
+	asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r_temp) );
+	DMSG("Current CPU cycle count: %u", r_temp);
 	return SM_EXIT_TO_SECURE;
 }
