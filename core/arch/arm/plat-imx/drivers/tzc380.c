@@ -16,6 +16,10 @@
 #include <kernel/panic.h>
 #include <mm/core_memprot.h>
 #include <mm/generic_ram_layout.h>
+// later additions
+#include <assert.h>
+#include <trace.h>
+#include <kernel/interrupt.h>
 
 /*
  * TZASC2_BASE is asserted non null when used.
@@ -29,6 +33,24 @@ register_phys_mem(MEM_AREA_IO_SEC, TZASC2_BASE, TZASC_SIZE);
 #endif
 
 register_phys_mem(MEM_AREA_IO_SEC, TZASC_BASE, TZASC_SIZE);
+
+// later additions
+static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
+{
+	EMSG("TZC permission failure");
+	tzc_fail_dump();
+
+	tzc_int_clear();
+
+	return ITRR_HANDLED;
+}
+
+static struct itr_handler tzc_itr_handler = {
+	.it = 36,
+	.handler = tzc_it_handler,
+};
+
+DECLARE_KEEP_PAGER(tzc_itr_handler);
 
 static int imx_tzc_auto_configure(vaddr_t addr, vaddr_t rsize, uint32_t attr,
 				  uint8_t region)
@@ -81,6 +103,11 @@ static TEE_Result imx_configure_tzasc(void)
 
 		tzc_dump_state();
 	}
+	
+	itr_add(&tzc_itr_handler);
+	itr_enable(tzc_itr_handler.it);
+	tzc_set_action(TZC_ACTION_INT);
+
 	return TEE_SUCCESS;
 }
 
