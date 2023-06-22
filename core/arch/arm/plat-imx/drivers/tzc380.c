@@ -103,10 +103,12 @@ static TEE_Result imx_configure_tzasc(void)
 
 		tzc_dump_state();
 	}
-	
+
 	itr_add(&tzc_itr_handler);
 	itr_enable(tzc_itr_handler.it);
 	tzc_set_action(TZC_ACTION_INT);
+
+	DMSG("Action register: %"PRIx32, tzc_get_action());
 
 	return TEE_SUCCESS;
 }
