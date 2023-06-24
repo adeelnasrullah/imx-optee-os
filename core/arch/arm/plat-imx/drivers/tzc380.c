@@ -37,6 +37,9 @@ register_phys_mem(MEM_AREA_IO_SEC, TZASC_BASE, TZASC_SIZE);
 // later additions
 static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 {
+	uint32_t r=0;
+        asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
+	DMSG("CPU cycle count: %u", r);
 	EMSG("TZC permission failure");
 	tzc_fail_dump();
 
@@ -46,7 +49,7 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 }
 
 static struct itr_handler tzc_itr_handler = {
-	.it = 36,
+	.it = 231,
 	.handler = tzc_it_handler,
 };
 
