@@ -114,7 +114,8 @@
 /* Central Security Unit register values */
 #define CSU_CSL_START			0x0
 #define CSU_CSL_END			0xA0
-#define	CSU_ACCESS_ALL			0x00FF00FF
+//#define	CSU_ACCESS_ALL			0x00FF00FF
+#define	CSU_ACCESS_ALL			0xFFFFFFFF
 #define CSU_SETTING_LOCK		0x01000100
 #define CSU_SA				0x218
 
