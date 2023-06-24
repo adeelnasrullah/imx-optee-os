@@ -53,7 +53,13 @@ static struct itr_handler tzc_itr_handler = {
 	.handler = tzc_it_handler,
 };
 
+static struct itr_handler tzc_itr_handler2 = {
+	.it = 141,
+	.handler = tzc_it_handler,
+};
+
 DECLARE_KEEP_PAGER(tzc_itr_handler);
+DECLARE_KEEP_PAGER(tzc_itr_handler2);
 
 static int imx_tzc_auto_configure(vaddr_t addr, vaddr_t rsize, uint32_t attr,
 				  uint8_t region)
@@ -105,13 +111,19 @@ static TEE_Result imx_configure_tzasc(void)
 			panic("Region lockdown failed!");
 
 		tzc_dump_state();
+		
+		if(i==0){
+		itr_add(&tzc_itr_handler);
+		itr_enable(tzc_itr_handler.it);
+		tzc_set_action(TZC_ACTION_INT);
+		}else{
+		itr_add(&tzc_itr_handler2);
+		itr_enable(tzc_itr_handler2.it);
+		tzc_set_action(TZC_ACTION_INT);
+		}
+
+		DMSG("Action register: %"PRIx32, tzc_get_action());
 	}
-
-	itr_add(&tzc_itr_handler);
-	itr_enable(tzc_itr_handler.it);
-	tzc_set_action(TZC_ACTION_INT);
-
-	DMSG("Action register: %"PRIx32, tzc_get_action());
 
 	return TEE_SUCCESS;
 }
