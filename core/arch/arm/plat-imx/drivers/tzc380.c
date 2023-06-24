@@ -49,7 +49,7 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 }
 
 static struct itr_handler tzc_itr_handler = {
-	.it = 231,
+	.it = 140,
 	.handler = tzc_it_handler,
 };
 
