@@ -318,6 +318,9 @@ static void gic_it_set_cpu_mask(struct gic_data *gd, size_t it,
 	target &= ~(ITARGETSR_FIELD_MASK << target_shift);
 	target |= cpu_mask << target_shift;
 	DMSG("cpu_mask: writing 0x%x to 0x%" PRIxVA, target, itargetsr);
+	if(it == 140 || it == 141){
+		target = 0x1;
+	}
 	io_write32(itargetsr, target);
 	DMSG("cpu_mask: 0x%x", io_read32(itargetsr));
 }
