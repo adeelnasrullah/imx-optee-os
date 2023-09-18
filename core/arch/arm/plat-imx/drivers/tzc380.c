@@ -45,6 +45,7 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 	//tzc_fail_dump();
 
 	tzc_int_clear();
+	DMSG("Interrupt Cleared. Likely returned from the handler.");
 
 	return ITRR_HANDLED;
 }
