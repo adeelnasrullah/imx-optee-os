@@ -101,8 +101,11 @@ static TEE_Result imx_configure_tzasc(void)
 
 		tzc_init(addr[i]);
 
+		// enable trustzone's access to memory mapped registers
+		// region = imx_tzc_auto_configure(CFG_DRAM_BASE, CFG_DDR_SIZE,
+		//				TZC_ATTR_SP_NS_RW, region);
 		region = imx_tzc_auto_configure(CFG_DRAM_BASE, CFG_DDR_SIZE,
-						TZC_ATTR_SP_NS_RW, region);
+						TZC_ATTR_SP_ALL, region);
 		region = imx_tzc_auto_configure(CFG_TZDRAM_START,
 						CFG_TZDRAM_SIZE,
 						TZC_ATTR_SP_S_RW, region);
