@@ -150,13 +150,25 @@ void tzc_fail_dump(void)
 	EMSG("Fail Id 0x%" PRIx32, io_read32(base + FAIL_ID));
 }
 
+/* Hard coding the base address of the two TZ Controllers
+on IMX6Q. Also, the original function have an error i.e. it tries
+to get VA of a VA which is wrong.*/
 void tzc_int_clear(void)
 {
 	//vaddr_t base = core_mmu_get_va(tzc.base, MEM_AREA_IO_SEC,
 	//			       TZC400_REG_SIZE);
 
 	//io_write32(base + INT_CLEAR, 0);
-	io_write32(tzc.base + INT_CLEAR, 0);
+
+	vaddr_t base = core_mmu_get_va(0x21d0000, MEM_AREA_IO_SEC,
+				       TZC400_REG_SIZE);
+	vaddr_t base2 = core_mmu_get_va(0x21d4000, MEM_AREA_IO_SEC,
+				       TZC400_REG_SIZE);
+
+	io_write32(base + INT_CLEAR, 0);
+	io_write32(base2 + INT_CLEAR, 0);
+
+	//io_write32(tzc.base + INT_CLEAR, 0);
 }
 
 static uint32_t addr_low(vaddr_t addr)
