@@ -127,8 +127,13 @@ static TEE_Result imx_configure_tzasc(void)
 		tzc_set_action(TZC_ACTION_INT);
 		}
 
+		// testing if the function works here
+		tzc_int_clear();
 		DMSG("Action register: %"PRIx32, tzc_get_action());
 	}
+	
+	// testing if the function works here
+	tzc_int_clear();
 
 	return TEE_SUCCESS;
 }
