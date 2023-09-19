@@ -96,6 +96,9 @@ static TEE_Result imx_configure_tzasc(void)
 		end = 2;
 	}
 
+	DMSG("Physical1: %x, Virtual1: %x", TZASC_BASE, addr[0] );
+	DMSG("Physical2: %x, Virtual2: %x", TZASC2_BASE, addr[1] );
+
 	for (i = 0; i < end; i++) {
 		uint8_t region = 1;
 

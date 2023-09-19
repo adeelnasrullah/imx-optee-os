@@ -152,10 +152,11 @@ void tzc_fail_dump(void)
 
 void tzc_int_clear(void)
 {
-	vaddr_t base = core_mmu_get_va(tzc.base, MEM_AREA_IO_SEC,
-				       TZC400_REG_SIZE);
+	//vaddr_t base = core_mmu_get_va(tzc.base, MEM_AREA_IO_SEC,
+	//			       TZC400_REG_SIZE);
 
-	io_write32(base + INT_CLEAR, 0);
+	//io_write32(base + INT_CLEAR, 0);
+	io_write32(tzc.base + INT_CLEAR, 0);
 }
 
 static uint32_t addr_low(vaddr_t addr)
