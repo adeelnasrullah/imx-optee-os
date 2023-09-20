@@ -120,10 +120,14 @@ static TEE_Result imx_configure_tzasc(void)
 		if(i==0){
 		itr_add(&tzc_itr_handler);
 		itr_enable(tzc_itr_handler.it);
+		// fixing it to CPU0
+		itr_set_affinity(tzc_itr_handler.it, 0);
 		tzc_set_action(TZC_ACTION_INT);
 		}else{
 		itr_add(&tzc_itr_handler2);
 		itr_enable(tzc_itr_handler2.it);
+		// fixing it to CPU0
+		itr_set_affinity(tzc_itr_handler2.it, 0);
 		tzc_set_action(TZC_ACTION_INT);
 		}
 
