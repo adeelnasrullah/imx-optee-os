@@ -114,7 +114,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	clear_timer_interrupt();
 
 	// set timer to fire after given time.
-	arm_timer_with_period(1);
+	arm_timer_with_period(4);
 
 	return TEE_SUCCESS;
 }
