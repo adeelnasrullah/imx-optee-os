@@ -16,7 +16,7 @@ static uint32_t timer_val;
 #define PTIMER_CTL_ENABLE			BIT(0)
 #define PTIMER_CTL_SINGLE_SHOT		BIT(1)
 #define PTIMER_CTL_INT_ENABLE		BIT(2)
-#define PTIMER_BOOT_PRE_SCALER		BIT(22)
+#define PTIMER_BOOT_PRE_SCALER		BIT(14)
 
 #define GIC_SPI_SEC_PHY_TIMER	29
 
