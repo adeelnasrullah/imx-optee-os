@@ -16,7 +16,7 @@ static uint32_t timer_val;
 #define PTIMER_CTL_ENABLE			BIT(0)
 #define PTIMER_CTL_SINGLE_SHOT		BIT(1)
 #define PTIMER_CTL_INT_ENABLE		BIT(2)
-#define PTIMER_BOOT_PRE_SCALER		BIT(14)
+#define PTIMER_BOOT_PRE_SCALER		0xFF
 
 #define GIC_SPI_SEC_PHY_TIMER	29
 
@@ -83,7 +83,7 @@ static void arm_timer_with_period(unsigned int period_sec)
 	}
 
 	// hardcoding frequency value now
-	uint32_t countdown = period_sec*792000000;
+	uint32_t countdown = period_sec*996000000;
 
 	timer_val = countdown;
 	arm_timer();
