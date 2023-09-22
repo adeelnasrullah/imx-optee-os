@@ -62,6 +62,7 @@ static void arm_timer(void)
 
 	write_ptimer_tval(timer_val);
 	write_ptimer_ctl(read_ptimer_ctl() | PTIMER_CTL_ENABLE);
+	IMSG("Armed timer with value: %x, with control register reading: %x", timer_val, read_ptimer_ctl());
 }
 
 /* A function to load an periodic delay and arm the timer */
