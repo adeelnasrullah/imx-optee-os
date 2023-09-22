@@ -13,9 +13,10 @@ static uint32_t timer_val;
 
 #define PTIMER_BASE 0x00A00600
 #define PTIMER_SIZE 0xFF
-#define PTIMER_CTL_ENABLE		BIT(0)
+#define PTIMER_CTL_ENABLE			BIT(0)
 #define PTIMER_CTL_SINGLE_SHOT		BIT(1)
 #define PTIMER_CTL_INT_ENABLE		BIT(2)
+#define PTIMER_BOOT_PRE_SCALER		BIT(22)
 
 #define GIC_SPI_SEC_PHY_TIMER	29
 
@@ -109,7 +110,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	itr_add(&arm_ptimer_handler);
 	itr_enable(arm_ptimer_handler.it);
 	// enable interrupt generation at the private timer registers
-	write_ptimer_ctl(PTIMER_CTL_INT_ENABLE);
+	write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
 	clear_timer_interrupt();
 
 	// set timer to fire after given time.
