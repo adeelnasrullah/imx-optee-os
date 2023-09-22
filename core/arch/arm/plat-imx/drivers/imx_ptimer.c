@@ -50,7 +50,15 @@ static uint32_t read_ptimer_ctl(void){
 
 	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	uint32_t val = (ptimer_base+U(0x08));
+	uint32_t val = io_read32(ptimer_base+U(0x08));
+	return val;
+}
+
+static uint32_t read_ptimer_tval(void){
+
+	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
+					   PTIMER_SIZE);
+	uint32_t val = io_read32(ptimer_base);
 	return val;
 }
 
@@ -113,7 +121,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	IMSG("Reading control register: %x before programming it with: %x", read_ptimer_ctl(), PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
 	// enable interrupt generation at the private timer registers
 	write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
-	IMSG("Reading control register: %x after programming it.", read_ptimer_ctl());
+	IMSG("Reading control register: %x after programming it, and tval register too: %x", read_ptimer_ctl(), read_ptimer_tval());
 	clear_timer_interrupt();
 
 	// set timer to fire after given time.
