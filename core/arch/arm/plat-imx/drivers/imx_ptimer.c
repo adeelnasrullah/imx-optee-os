@@ -24,7 +24,7 @@ static void clear_timer_interrupt(void){
 
 	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	io_write32(ptimer_base+0x0C, 0);
+	io_write32(ptimer_base+U(0x0C), BIT(0));
 	return;
 
 }
@@ -33,7 +33,7 @@ static void write_ptimer_ctl(uint32_t val){
 
     vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	io_write32(ptimer_base+0x8, val);
+	io_write32(ptimer_base+U(0x08), val);
 	return;
 }
 
@@ -50,7 +50,7 @@ static uint32_t read_ptimer_ctl(void){
 
 	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	uint32_t val = (ptimer_base+0x8);
+	uint32_t val = (ptimer_base+U(0x08));
 	return val;
 }
 
