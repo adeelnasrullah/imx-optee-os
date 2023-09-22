@@ -13,9 +13,9 @@ static uint32_t timer_val;
 
 #define PTIMER_BASE 0x00A00600
 #define PTIMER_SIZE 0xFF
-#define CNTP_CTL_ENABLE		BIT(0)
-#define CNTP_CTL_SINGLE_SHOT		BIT(1)
-#define CNTP_CTL_INT_ENABLE		BIT(2)
+#define PTIMER_CTL_ENABLE		BIT(0)
+#define PTIMER_CTL_SINGLE_SHOT		BIT(1)
+#define PTIMER_CTL_INT_ENABLE		BIT(2)
 
 #define GIC_SPI_SEC_PHY_TIMER	29
 
@@ -28,7 +28,7 @@ static void clear_timer_interrupt(void){
 
 }
 
-static void write_cntp_ctl(uint32_t val){
+static void write_ptimer_ctl(uint32_t val){
 
     vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
@@ -37,7 +37,7 @@ static void write_cntp_ctl(uint32_t val){
 }
 
 
-static void write_cntp_tval(uint32_t val){
+static void write_ptimer_tval(uint32_t val){
 
     vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
@@ -45,7 +45,7 @@ static void write_cntp_tval(uint32_t val){
 	return;
 }
 
-static uint32_t read_cntp_ctl(void){
+static uint32_t read_ptimer_ctl(void){
 
 	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
@@ -53,21 +53,14 @@ static uint32_t read_cntp_ctl(void){
 	return val;
 }
 
-
-static uint32_t read_cntfrq(void){
-	// hard coding for now
-	return 754000000;
-}
-
-
 /* A function to arm programmed timer countdown */
 static void arm_timer(void)
 {
 	if (!timer_val)
 		return;
 
-	write_cntp_tval(timer_val);
-	write_cntp_ctl(read_cntp_ctl() | CNTP_CTL_ENABLE);
+	write_ptimer_tval(timer_val);
+	write_ptimer_ctl(read_ptimer_ctl() | PTIMER_CTL_ENABLE);
 }
 
 /* A function to load an periodic delay and arm the timer */
@@ -88,11 +81,11 @@ static void arm_timer_with_period(unsigned int period_sec)
 
 
 /* A handler for the timer interrupt */
-static enum itr_return arm_cntp_it_handler(struct itr_handler *handler __unused)
+static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unused)
 {
 	// disable the timer and clear the status flag
 	clear_timer_interrupt();
-	write_cntp_ctl(CNTP_CTL_INT_ENABLE);
+	write_ptimer_ctl(PTIMER_CTL_INT_ENABLE);
 
 	if (timer_val) {
 		/* Arm timer again */
@@ -103,20 +96,20 @@ static enum itr_return arm_cntp_it_handler(struct itr_handler *handler __unused)
 
 	return ITRR_HANDLED;
 }
-static struct itr_handler arm_cntp_handler = {
+static struct itr_handler arm_ptimer_handler = {
 	.it = GIC_SPI_SEC_PHY_TIMER,
-	.handler = arm_cntp_it_handler,
+	.handler = arm_ptimer_it_handler,
 };
-KEEP_PAGER(arm_cntp_handler);
+KEEP_PAGER(arm_ptimer_handler);
 
 /* An init step to register resources and arm a 1sec periodic interrupt */
-static TEE_Result init_arm_cntp_timer(void)
+static TEE_Result init_arm_ptimer_timer(void)
 {
 	// enabling the distributor
-	itr_add(&arm_cntp_handler);
-	itr_enable(arm_cntp_handler.it);
+	itr_add(&arm_ptimer_handler);
+	itr_enable(arm_ptimer_handler.it);
 	// enable interrupt generation at the private timer registers
-	write_cntp_ctl(CNTP_CTL_INT_ENABLE);
+	write_ptimer_ctl(PTIMER_CTL_INT_ENABLE);
 	clear_timer_interrupt();
 
 	// set timer to fire after given time.
@@ -125,4 +118,4 @@ static TEE_Result init_arm_cntp_timer(void)
 	return TEE_SUCCESS;
 }
 
-driver_init(init_arm_cntp_timer);
+driver_init(init_arm_ptimer_timer);
