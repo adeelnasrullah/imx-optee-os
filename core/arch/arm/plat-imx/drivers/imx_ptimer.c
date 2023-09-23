@@ -16,7 +16,7 @@ static uint32_t timer_val;
 #define PTIMER_CTL_ENABLE			BIT(0)
 #define PTIMER_CTL_SINGLE_SHOT		BIT(1)
 #define PTIMER_CTL_INT_ENABLE		BIT(2)
-#define PTIMER_BOOT_PRE_SCALER		0xFF
+#define PTIMER_BOOT_PRE_SCALER		0xFF00
 
 #define GIC_SPI_SEC_PHY_TIMER	29
 
@@ -70,7 +70,7 @@ static void arm_timer(void)
 
 	write_ptimer_tval(timer_val);
 	write_ptimer_ctl(read_ptimer_ctl() | PTIMER_CTL_ENABLE);
-	IMSG("Armed timer with value: %x, with control register reading: %x", timer_val, read_ptimer_ctl());
+	IMSG("Armed timer with value: %x, with control register reading: %x", read_ptimer_tval(), read_ptimer_ctl());
 }
 
 /* A function to load an periodic delay and arm the timer */
@@ -102,6 +102,7 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 		arm_timer();
 		/* Do something */
 		IMSG("Secure Tick!!!!!");
+		IMSG("Controller status: %x,", read_ptimer_ctl());
 	}
 
 	return ITRR_HANDLED;
