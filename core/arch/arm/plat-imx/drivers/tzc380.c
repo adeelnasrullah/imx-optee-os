@@ -34,6 +34,21 @@ register_phys_mem(MEM_AREA_IO_SEC, TZASC2_BASE, TZASC_SIZE);
 
 register_phys_mem(MEM_AREA_IO_SEC, TZASC_BASE, TZASC_SIZE);
 
+#define PTIMER_BASE 0x00A00600
+#define PTIMER_SIZE 0xFF
+#define PTIMER_CTL_ENABLE			BIT(0)
+#define PTIMER_CTL_SINGLE_SHOT		BIT(1)
+#define PTIMER_CTL_INT_ENABLE		BIT(2)
+#define PTIMER_BOOT_PRE_SCALER		0xFF00
+
+void write_ptimer_ctl(uint32_t val){
+
+    vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
+					   PTIMER_SIZE);
+	io_write32(ptimer_base+U(0x08), val);
+	return;
+}
+
 // later additions
 static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 {
@@ -45,6 +60,7 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 	//tzc_fail_dump();
 
 	tzc_int_clear();
+	write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
 	DMSG("Interrupt Cleared. Likely returned from the handler.");
 
 	return ITRR_HANDLED;
