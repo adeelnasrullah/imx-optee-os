@@ -83,7 +83,8 @@ static void arm_timer_with_period(unsigned int period_sec)
 	}
 
 	// hardcoding frequency value now
-	uint32_t countdown = period_sec*996000000;
+	//uint32_t countdown = period_sec*996000000;
+	uint32_t countdown = 0xFFFFFFFF;
 
 	timer_val = countdown;
 	arm_timer();
