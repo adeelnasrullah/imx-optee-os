@@ -124,7 +124,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	// enable interrupt generation at the private timer registers
 	write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
 	IMSG("Reading control register: %x after programming it, and tval register too: %x", read_ptimer_ctl(), read_ptimer_tval());
-	clear_timer_interrupt();
+	//clear_timer_interrupt();
 
 	// set timer to fire after given time.
 	arm_timer_with_period(4);
