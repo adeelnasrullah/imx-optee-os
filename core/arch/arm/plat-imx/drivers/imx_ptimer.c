@@ -120,11 +120,13 @@ static TEE_Result init_arm_ptimer_timer(void)
 	// enabling the distributor
 	itr_add(&arm_ptimer_handler);
 	itr_enable(arm_ptimer_handler.it);
-	IMSG("Reading control register: %x before programming it with: %x", read_ptimer_ctl(), PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
+	//IMSG("Reading control register: %x before programming it with: %x", read_ptimer_ctl(), PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
 	// enable interrupt generation at the private timer registers
 	//write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
-	IMSG("Reading control register: %x after programming it, and tval register too: %x", read_ptimer_ctl(), read_ptimer_tval());
+	//IMSG("Reading control register: %x after programming it, and tval register too: %x", read_ptimer_ctl(), read_ptimer_tval());
 	//clear_timer_interrupt();
+
+	IMSG("Just saying Hiiii !!!!");
 
 	// set timer to fire after given time.
 	//arm_timer_with_period(4);
