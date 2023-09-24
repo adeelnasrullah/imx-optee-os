@@ -18,7 +18,7 @@ static uint32_t timer_val;
 #define PTIMER_CTL_INT_ENABLE		BIT(2)
 #define PTIMER_BOOT_PRE_SCALER		0xFF00
 
-#define GIC_SPI_SEC_PHY_TIMER	29
+#define GIC_SPI_SEC_PHY_TIMER	27
 
 static void clear_timer_interrupt(void){
 
@@ -118,8 +118,8 @@ KEEP_PAGER(arm_ptimer_handler);
 static TEE_Result init_arm_ptimer_timer(void)
 {
 	// enabling the distributor
-	//itr_add(&arm_ptimer_handler);
-	//itr_enable(arm_ptimer_handler.it);
+	itr_add(&arm_ptimer_handler);
+	itr_enable(arm_ptimer_handler.it);
 	//IMSG("Reading control register: %x before programming it with: %x", read_ptimer_ctl(), PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
 	// enable interrupt generation at the private timer registers
 	//write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
