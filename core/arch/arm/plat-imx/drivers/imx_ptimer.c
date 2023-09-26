@@ -11,7 +11,7 @@
 #include <mm/core_memprot.h>
 
 /* Timer countdown/delay argument for the target calibration periodicity */
-static uint32_t timer_val;
+static uint64_t timer_val;
 
 #define PTIMER_BASE 0x00A00200
 #define PTIMER_SIZE 0xFF
@@ -112,7 +112,7 @@ static void arm_timer_with_period(unsigned int period_msec)
 {
 
 	// hardcoding frequency value now == 996000000
-	uint32_t countdown = period_msec*996000;
+	uint64_t countdown = period_msec*996000;
 
 	timer_val = countdown;
 	arm_timer();
@@ -159,7 +159,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	IMSG("Global Timer Interrupt Registered !!!");
 
 	// set timer to fire after given time in milli-seconds
-	arm_timer_with_period(15000);
+	arm_timer_with_period(5000);
 
 	return TEE_SUCCESS;
 }
