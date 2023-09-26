@@ -89,11 +89,11 @@ static void arm_timer(void)
 	// read ptimer_value
 	uint32_t timer_high = read_ptimer_tval_high();
 	uint32_t timer_low = read_ptimer_tval_low();
-	if(!(timer_high == read_ptimer_tval_high())){
-		IMSG("Incorrect timer values -- high: %x, low: %x", timer_high, timer_low);
-		timer_val = 0;
-		return;
-	}
+	//if(!(timer_high == read_ptimer_tval_high())){
+	//	IMSG("Incorrect timer values -- high: %x, low: %x", timer_high, timer_low);
+	//	timer_val = 0;
+	//	return;
+	//}
 	IMSG("Current timer values -- high: %x, low: %x", timer_high, timer_low);
 
 	// computing the compare value
