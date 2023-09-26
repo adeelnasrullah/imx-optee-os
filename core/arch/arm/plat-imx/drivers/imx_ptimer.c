@@ -97,12 +97,13 @@ static void arm_timer(void)
 	IMSG("Current timer values -- high: %x, low: %x", timer_high, timer_low);
 
 	// computing the compare value
-	uint64_t compare_value = timer_high<<0xFFFFFFFF;
-	compare_value = compare_value + timer_low + timer_val;
+	uint64_t compare_value = timer_high<<32;
+	compare_value = compare_value | timer_low;
+	compare_value += timer_val;
 
 	// writing compare value
 	write_ptimer_cval_low(compare_value & 0xFFFFFFFF);
-	write_ptimer_cval_high(compare_value>>0xFFFFFFFF);
+	write_ptimer_cval_high(compare_value>>32);
 	// enabling compare value and the corresponding interrupt 
 	write_ptimer_ctl((read_ptimer_ctl() | PTIMER_CTL_INT_ENABLE | PTIMER_CTL_ENABLE));
 }
