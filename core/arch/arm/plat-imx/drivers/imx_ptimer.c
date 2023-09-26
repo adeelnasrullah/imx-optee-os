@@ -11,7 +11,11 @@
 #include <mm/core_memprot.h>
 
 /* Timer countdown/delay argument for the target calibration periodicity */
-static uint64_t timer_val;
+static uint64_t timer_val, compare_value;
+static uint32_t timer_tval_low;
+static uint32_t timer_tval_high;
+static uint32_t timer_cval_low;
+static uint32_t timer_cval_high;
 
 #define PTIMER_BASE 0x00A00200
 #define PTIMER_SIZE 0xFF
@@ -87,26 +91,29 @@ static void arm_timer(void)
 		return;
 
 	// read ptimer_value
-	uint32_t timer_high = read_ptimer_tval_high();
-	uint32_t timer_low = read_ptimer_tval_low();
+	timer_tval_high = read_ptimer_tval_high();
+	timer_tval_low = read_ptimer_tval_low();
 	//if(!(timer_high == read_ptimer_tval_high())){
 	//	IMSG("Incorrect timer values -- high: %x, low: %x", timer_high, timer_low);
 	//	timer_val = 0;
 	//	return;
 	//}
-	IMSG("Current timer values -- high: %x, low: %x", timer_high, timer_low);
+	IMSG("Current timer values -- high: %x, low: %x", timer_tval_high, timer_tval_low);
 
 	// computing the compare value
-	uint64_t compare_value = timer_high<<32;
-	compare_value = compare_value | timer_low;
+	compare_value = timer_tval_high;
+	compare_value = compare_value<<32;
+	compare_value = compare_value | timer_tval_low;
 	compare_value += timer_val;
 
+	uint64_t temp = compare_value;
+
 	// writing compare value
-	IMSG("Arming with the value: %x, %x", compare_value & 0xFFFFFFFF, compare_value>>32);
+	IMSG("Arming with the value -- low: %x, high: %x", temp & 0xFFFFFFFF, temp>>32);
 	write_ptimer_cval_low(compare_value & 0xFFFFFFFF);
 	write_ptimer_cval_high(compare_value>>32);
 	// enabling compare value and the corresponding interrupt 
-	write_ptimer_ctl((read_ptimer_ctl() | PTIMER_CTL_INT_ENABLE | PTIMER_CTL_ENABLE));
+	write_ptimer_ctl(PTIMER_ENABLE | PTIMER_CTL_INT_ENABLE | PTIMER_CTL_ENABLE);
 }
 
 /* A function to load an periodic delay and arm the timer */
@@ -126,7 +133,7 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 {
 	// disable the timer and clear the status flag
 	clear_timer_interrupt();
-	write_ptimer_ctl(read_ptimer_ctl() & ~PTIMER_CTL_ENABLE);
+	write_ptimer_ctl(PTIMER_ENABLE | PTIMER_CTL_INT_ENABLE);
 
 	if (timer_val) {
 		/* Arm timer again */
@@ -158,6 +165,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	IMSG("Global Timer Enabled.");
 	// clear interrupt status flag
 	clear_timer_interrupt();
+	write_ptimer_ctl(PTIMER_ENABLE | PTIMER_CTL_INT_ENABLE);
 	IMSG("Global Timer Interrupt Registered !!!");
 
 	// set timer to fire after given time in milli-seconds
