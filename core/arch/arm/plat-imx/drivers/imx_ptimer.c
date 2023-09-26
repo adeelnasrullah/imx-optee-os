@@ -44,7 +44,7 @@ static void write_ptimer_cval_high(uint32_t val){
 
     vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	io_write32(ptimer_base+U(0x10), val);
+	io_write32(ptimer_base+U(0x14), val);
 	return;
 }
 
@@ -52,7 +52,7 @@ static void write_ptimer_cval_low(uint32_t val){
 
     vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	io_write32(ptimer_base+U(0x14), val);
+	io_write32(ptimer_base+U(0x10), val);
 	return;
 }
 
@@ -64,19 +64,19 @@ static uint32_t read_ptimer_ctl(void){
 	return val;
 }
 
-static uint32_t read_ptimer_tval_high(void){
-
-	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
-					   PTIMER_SIZE);
-	uint32_t val = io_read32(ptimer_base+U(0x10));
-	return val;
-}
-
 static uint32_t read_ptimer_tval_low(void){
 
 	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	uint32_t val = io_read32(ptimer_base+U(0x14));
+	uint32_t val = io_read32(ptimer_base);
+	return val;
+}
+
+static uint32_t read_ptimer_tval_high(void){
+
+	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
+					   PTIMER_SIZE);
+	uint32_t val = io_read32(ptimer_base+U(0x04));
 	return val;
 }
 
