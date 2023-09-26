@@ -102,6 +102,7 @@ static void arm_timer(void)
 	compare_value += timer_val;
 
 	// writing compare value
+	IMSG("Arming with the value: %x, %x", compare_value & 0xFFFFFFFF, compare_value>>32);
 	write_ptimer_cval_low(compare_value & 0xFFFFFFFF);
 	write_ptimer_cval_high(compare_value>>32);
 	// enabling compare value and the corresponding interrupt 
