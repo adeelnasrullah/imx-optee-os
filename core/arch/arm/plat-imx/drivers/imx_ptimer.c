@@ -68,7 +68,7 @@ static uint32_t read_ptimer_tval_high(void){
 
 	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	uint32_t val = io_read32(ptimer_base);
+	uint32_t val = io_read32(ptimer_base+U(0x10));
 	return val;
 }
 
@@ -76,7 +76,7 @@ static uint32_t read_ptimer_tval_low(void){
 
 	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	uint32_t val = io_read32(ptimer_base+U(0x04));
+	uint32_t val = io_read32(ptimer_base+U(0x14));
 	return val;
 }
 
