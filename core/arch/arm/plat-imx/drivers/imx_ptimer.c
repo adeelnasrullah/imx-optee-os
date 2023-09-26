@@ -104,16 +104,16 @@ static void arm_timer(void)
 	compare_value = timer_tval_high;
 	compare_value = compare_value<<32;
 	compare_value = compare_value | timer_tval_low;
-	compare_value += timer_val;
+	//compare_value += timer_val;
 
 	uint64_t temp = compare_value;
 
 	// writing compare value
 	IMSG("Arming with the value -- low: %x, high: %x", temp & 0xFFFFFFFF, temp>>32);
-	write_ptimer_cval_low(compare_value & 0xFFFFFFFF);
-	write_ptimer_cval_high(compare_value>>32);
+	//write_ptimer_cval_low(compare_value & 0xFFFFFFFF);
+	//write_ptimer_cval_high(compare_value>>32);
 	// enabling compare value and the corresponding interrupt 
-	write_ptimer_ctl(PTIMER_ENABLE | PTIMER_CTL_INT_ENABLE | PTIMER_CTL_ENABLE);
+	//write_ptimer_ctl(PTIMER_ENABLE | PTIMER_CTL_INT_ENABLE | PTIMER_CTL_ENABLE);
 }
 
 /* A function to load an periodic delay and arm the timer */
@@ -121,7 +121,7 @@ static void arm_timer_with_period(unsigned int period_msec)
 {
 
 	// hardcoding frequency value now == 996000000
-	uint64_t countdown = period_msec*1540000;
+	uint64_t countdown = period_msec*996000;
 
 	timer_val = countdown;
 	arm_timer();
