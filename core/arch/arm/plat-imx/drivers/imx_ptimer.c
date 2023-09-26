@@ -1,4 +1,6 @@
 /* Source: https://github.com/OP-TEE/optee_os/issues/2925  */
+/* ARM Documentation */
+/* https://developer.arm.com/documentation/ddi0407/e/global-timer--private-timers--and-watchdog-registers/global-timer-registers/global-timer-control-register?lang=en */
 
 #include <io.h>
 #include <imx.h>
@@ -11,18 +13,19 @@
 /* Timer countdown/delay argument for the target calibration periodicity */
 static uint32_t timer_val;
 
-#define PTIMER_BASE 0x00A00600
+#define PTIMER_BASE 0x00A00200
 #define PTIMER_SIZE 0xFF
-#define PTIMER_CTL_ENABLE			BIT(0)
-#define PTIMER_CTL_SINGLE_SHOT		BIT(1)
+#define PTIMER_ENABLE				BIT(0)
+#define PTIMER_CTL_ENABLE			BIT(1)
 #define PTIMER_CTL_INT_ENABLE		BIT(2)
+#define PTIMER_CTL_SINGLE_SHOT		BIT(3)
 #define PTIMER_BOOT_PRE_SCALER		0xFF00
 
 #define GIC_SPI_SEC_PHY_TIMER	27
 
 static void clear_timer_interrupt(void){
 
-	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_NSEC,
+	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
 	io_write32(ptimer_base+U(0x0C), BIT(0));
 	return;
@@ -31,34 +34,49 @@ static void clear_timer_interrupt(void){
 
 static void write_ptimer_ctl(uint32_t val){
 
-    vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_NSEC,
+    vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
 	io_write32(ptimer_base+U(0x08), val);
 	return;
 }
 
+static void write_ptimer_cval_high(uint32_t val){
 
-static void write_ptimer_tval(uint32_t val){
-
-    vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_NSEC,
+    vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
-	io_write32(ptimer_base, val);
+	io_write32(ptimer_base+U(0x10), val);
+	return;
+}
+
+static void write_ptimer_cval_low(uint32_t val){
+
+    vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
+					   PTIMER_SIZE);
+	io_write32(ptimer_base+U(0x14), val);
 	return;
 }
 
 static uint32_t read_ptimer_ctl(void){
 
-	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_NSEC,
+	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
 	uint32_t val = io_read32(ptimer_base+U(0x08));
 	return val;
 }
 
-static uint32_t read_ptimer_tval(void){
+static uint32_t read_ptimer_tval_high(void){
 
-	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_NSEC,
+	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
 					   PTIMER_SIZE);
 	uint32_t val = io_read32(ptimer_base);
+	return val;
+}
+
+static uint32_t read_ptimer_tval_low(void){
+
+	vaddr_t ptimer_base = core_mmu_get_va(PTIMER_BASE, MEM_AREA_IO_SEC,
+					   PTIMER_SIZE);
+	uint32_t val = io_read32(ptimer_base+U(0x04));
 	return val;
 }
 
@@ -68,23 +86,33 @@ static void arm_timer(void)
 	if (!timer_val)
 		return;
 
-	write_ptimer_tval(timer_val);
-	write_ptimer_ctl(read_ptimer_ctl() | PTIMER_CTL_ENABLE);
-	IMSG("Armed timer with value: %x, with control register reading: %x", read_ptimer_tval(), read_ptimer_ctl());
+	// read ptimer_value
+	uint32_t timer_high = read_ptimer_tval_high();
+	uint32_t timer_low = read_ptimer_tval_low();
+	if(!(timer_high == read_ptimer_tval_high())){
+		IMSG("Incorrect timer values -- high: %x, low: %x", timer_high, timer_low);
+		timer_val = 0;
+		return;
+	}
+	IMSG("Current timer values -- high: %x, low: %x", timer_high, timer_low);
+
+	// computing the compare value
+	uint64_t compare_value = timer_high<<0xFFFFFFFF;
+	compare_value = compare_value + timer_low + timer_val;
+
+	// writing compare value
+	write_ptimer_cval_low(compare_value & 0xFFFFFFFF);
+	write_ptimer_cval_high(compare_value>>0xFFFFFFFF);
+	// enabling compare value and the corresponding interrupt 
+	write_ptimer_ctl((read_ptimer_ctl() | PTIMER_CTL_INT_ENABLE | PTIMER_CTL_ENABLE));
 }
 
 /* A function to load an periodic delay and arm the timer */
-static void arm_timer_with_period(unsigned int period_sec)
+static void arm_timer_with_period(unsigned int period_msec)
 {
 
-	// at 996 MHz the maximum period will be 4 just over 4 seconds
-	if (period_sec > 4){
-		period_sec = 4;
-	}
-
-	// hardcoding frequency value now
-	//uint32_t countdown = period_sec*996000000;
-	uint32_t countdown = 0xFFFFFFFF;
+	// hardcoding frequency value now == 996000000
+	uint32_t countdown = period_msec*996000;
 
 	timer_val = countdown;
 	arm_timer();
@@ -96,14 +124,13 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 {
 	// disable the timer and clear the status flag
 	clear_timer_interrupt();
-	write_ptimer_ctl(PTIMER_CTL_INT_ENABLE);
+	write_ptimer_ctl(read_ptimer_ctl() & ~PTIMER_CTL_ENABLE);
 
 	if (timer_val) {
 		/* Arm timer again */
 		arm_timer();
 		/* Do something */
 		IMSG("Secure Tick!!!!!");
-		IMSG("Controller status: %x,", read_ptimer_ctl());
 	}
 
 	return ITRR_HANDLED;
@@ -120,16 +147,19 @@ static TEE_Result init_arm_ptimer_timer(void)
 	// enabling the distributor
 	itr_add(&arm_ptimer_handler);
 	itr_enable(arm_ptimer_handler.it);
-	//IMSG("Reading control register: %x before programming it with: %x", read_ptimer_ctl(), PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
-	// enable interrupt generation at the private timer registers
-	//write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
-	//IMSG("Reading control register: %x after programming it, and tval register too: %x", read_ptimer_ctl(), read_ptimer_tval());
-	//clear_timer_interrupt();
+	// enable global timer if it is not enabled already
+	uint32_t timer_status = read_ptimer_ctl();
+	if (!(timer_status & 1)){
+		IMSG("Global Timer was disabled. Enabling it now !!!");
+		write_ptimer_ctl(PTIMER_ENABLE);
+	}
+	IMSG("Global Timer Enabled.");
+	// clear interrupt status flag
+	clear_timer_interrupt();
+	IMSG("Global Timer Interrupt Registered !!!");
 
-	IMSG("Just saying Hiiii !!!!");
-
-	// set timer to fire after given time.
-	//arm_timer_with_period(4);
+	// set timer to fire after given time in milli-seconds
+	arm_timer_with_period(15000);
 
 	return TEE_SUCCESS;
 }
