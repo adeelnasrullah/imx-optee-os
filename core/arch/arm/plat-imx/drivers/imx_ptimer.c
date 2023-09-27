@@ -14,8 +14,6 @@
 static uint64_t timer_val, compare_value;
 static uint32_t timer_tval_low;
 static uint32_t timer_tval_high;
-static uint32_t timer_cval_low;
-static uint32_t timer_cval_high;
 
 #define PTIMER_BASE 0x00A00200
 #define PTIMER_SIZE 0xFF
@@ -133,7 +131,7 @@ static void arm_timer_with_period(unsigned int period_msec)
 	arm_timer();
 }
 
- uint8_t read_mpidr(void){
+ uint32_t read_mpidr(void){
 	uint32_t mpidr = 0;
 	asm volatile("mrc p15, 0, %0, c0, c0, 5" : "=r"(mpidr));
     mpidr &= 0xFF;
