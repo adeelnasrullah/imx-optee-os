@@ -162,6 +162,8 @@ static TEE_Result init_arm_ptimer_timer(void)
 	// enabling the distributor
 	itr_add(&arm_ptimer_handler);
 	itr_enable(arm_ptimer_handler.it);
+	// sending interrupt to all cpus
+	itr_set_affinity(GIC_SPI_SEC_PHY_TIMER, 0x0F);
 	// enable global timer if it is not enabled already
 	uint32_t timer_status = read_ptimer_ctl();
 	if (!(timer_status & 1)){
