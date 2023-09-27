@@ -10,10 +10,14 @@
 #include <kernel/interrupt.h>
 #include <mm/core_memprot.h>
 
+#include <time.h>
+#include <stdlib.h>
+
 /* Timer countdown/delay argument for the target calibration periodicity */
 static uint64_t timer_val, compare_value;
 static uint32_t timer_tval_low;
 static uint32_t timer_tval_high;
+static uint64_t cycle_count_wd=0;
 
 #define PTIMER_BASE 0x00A00200
 #define PTIMER_SIZE 0xFF
@@ -104,7 +108,7 @@ static void arm_timer(void)
 	//	timer_val = 0;
 	//	return;
 	//}
-	IMSG("Current timer values -- high: %x, low: %x", timer_tval_high, timer_tval_low);
+	//IMSG("Current timer values -- high: %x, low: %x", timer_tval_high, timer_tval_low);
 
 	// computing the compare value
 	compare_value = (uint64_t) timer_tval_high;
@@ -113,7 +117,7 @@ static void arm_timer(void)
 	compare_value = compare_value + timer_val;
 
 	// writing compare value
-	IMSG("Arming with the value -- high: %x, low: %x", get_hi(compare_value), get_lo(compare_value));
+	//IMSG("Arming with the value -- high: %x, low: %x", get_hi(compare_value), get_lo(compare_value));
 	write_ptimer_cval_low(get_lo(compare_value));
 	write_ptimer_cval_high(get_hi(compare_value));
 	// enabling compare value and the corresponding interrupt 
@@ -150,7 +154,13 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 		/* Arm timer again */
 		arm_timer();
 		/* Do something */
-		IMSG("Secure Tick on CPU: %d!!!!!", read_cpuid());
+		//IMSG("Secure Tick on CPU: %d!!!!!", read_cpuid());
+		// spend some cycles ~500 simulating time spent by the watchdog
+		for (int i=0; i<200; i++){
+			cycle_count_wd += 1;
+		}
+		srand(time(NULL));   // Initialization, should only be called once.
+		int r = rand();
 	}
 
 	return ITRR_HANDLED;
