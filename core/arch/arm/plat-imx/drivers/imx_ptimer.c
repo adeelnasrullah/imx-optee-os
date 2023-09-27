@@ -133,6 +133,13 @@ static void arm_timer_with_period(unsigned int period_msec)
 	arm_timer();
 }
 
+ uint8_t read_mpidr(void){
+	uint32_t mpidr = 0;
+	asm volatile("mrc p15, 0, %0, c0, c0, 5" : "=r"(mpidr));
+    mpidr &= 0xFF;
+	return mpidr;
+}
+
 
 /* A handler for the timer interrupt */
 static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unused)
@@ -145,7 +152,7 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 		/* Arm timer again */
 		arm_timer();
 		/* Do something */
-		IMSG("Secure Tick!!!!!");
+		IMSG("Secure Tick on CPU: %d!!!!!", read_mpidr());
 	}
 
 	return ITRR_HANDLED;
@@ -177,7 +184,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	IMSG("Global Timer Interrupt Registered !!!");
 
 	// set timer to fire after given time in milli-seconds
-	arm_timer_with_period(5000);
+	arm_timer_with_period(100);
 
 	return TEE_SUCCESS;
 }
