@@ -27,12 +27,12 @@ static uint32_t timer_cval_high;
 
 #define GIC_SPI_SEC_PHY_TIMER	27
 
-uint32_t get_hi(uint64_t input){
-	return (uint32_t) input >> 32;
+uint32_t get_hi(uint64_t x){
+	return x >> 32;
 }
 
-uint32_t get_lo(uint64_t input){
-	return (uint32_t) ((1ULL << 32 - 1) & input);
+uint32_t get_lo(uint64_t x){
+	return ((1ULL << 32) - 1) & x;
 }
 
 static void clear_timer_interrupt(void){
@@ -129,7 +129,7 @@ static void arm_timer_with_period(unsigned int period_msec)
 	// hardcoding frequency value now == 996000000
 	timer_val = (uint64_t) period_msec * (uint64_t) 996000;
 
-	IMSG("Timer value before arming it: %d -- high: %d, low: %d", timer_val, (timer_val), get_lo(timer_val));
+	IMSG("Timer value before arming it: %lx -- high: %x, low: %x", timer_val, get_hi(timer_val), get_lo(timer_val));
 	arm_timer();
 }
 
