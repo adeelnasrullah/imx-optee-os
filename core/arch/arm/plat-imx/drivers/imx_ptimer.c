@@ -11,7 +11,7 @@
 #include <mm/core_memprot.h>
 
 /* Timer countdown/delay argument for the target calibration periodicity */
-static uint32_t timer_val_low, timer_val_high, compare_value_low, compare_value_high;
+static uint64_t timer_val, compare_value;
 static uint32_t timer_tval_low;
 static uint32_t timer_tval_high;
 static uint32_t timer_cval_low;
@@ -26,6 +26,14 @@ static uint32_t timer_cval_high;
 #define PTIMER_BOOT_PRE_SCALER		0xFF00
 
 #define GIC_SPI_SEC_PHY_TIMER	27
+
+uint32_t get_hi(uint64_t input){
+	return (uint32_t) input >> 32;
+}
+
+uint32_t get_lo(uint64_t input){
+	return (uint32_t) ((1ULL << 32 - 1) & input);
+}
 
 static void clear_timer_interrupt(void){
 
@@ -87,7 +95,7 @@ static uint32_t read_ptimer_tval_high(void){
 /* A function to arm programmed timer countdown */
 static void arm_timer(void)
 {
-	if (!timer_val_low)
+	if (!timer_val)
 		return;
 
 	// read ptimer_value
@@ -101,13 +109,15 @@ static void arm_timer(void)
 	IMSG("Current timer values -- high: %x, low: %x", timer_tval_high, timer_tval_low);
 
 	// computing the compare value
-	compare_value_low = ADD_OVERFLOW(timer_tval_low, timer_val_low, &compare_value_high);
-	compare_value_high = compare_value_high + timer_tval_high + timer_val_high;
+	compare_value = (uint64_t) timer_tval_high;
+	compare_value = compare_value << 32;
+	compare_value = compare_value + (uint64_t) (timer_tval_low);
+	compare_value = compare_value + timer_val;
 
 	// writing compare value
-	IMSG("Arming with the value -- high: %x, low: %x", compare_value_high, compare_value_low);
-	write_ptimer_cval_low(compare_value_low);
-	write_ptimer_cval_high(compare_value_high);
+	IMSG("Arming with the value -- high: %x, low: %x", get_hi(compare_value), get_lo(compare_value));
+	write_ptimer_cval_low(get_lo(compare_value));
+	write_ptimer_cval_high(get_hi(compare_value));
 	// enabling compare value and the corresponding interrupt 
 	write_ptimer_ctl(PTIMER_ENABLE | PTIMER_CTL_INT_ENABLE | PTIMER_CTL_ENABLE);
 }
@@ -117,9 +127,9 @@ static void arm_timer_with_period(unsigned int period_msec)
 {
 
 	// hardcoding frequency value now == 996000000
-	timer_val_low = MUL_OVERFLOW(period_msec, (uint32_t) 996000, &timer_val_high) ;
+	timer_val = (uint64_t) period_msec * (uint64_t) 996000;
 
-	IMSG("Timer value before arming it -- high: %x, low: %x", timer_val_high, timer_val_low);
+	IMSG("Timer value before arming it: %d -- high: %d, low: %d", timer_val, (timer_val), get_lo(timer_val));
 	arm_timer();
 }
 
@@ -131,7 +141,7 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 	clear_timer_interrupt();
 	write_ptimer_ctl(PTIMER_ENABLE | PTIMER_CTL_INT_ENABLE);
 
-	if (timer_val_low) {
+	if (timer_val) {
 		/* Arm timer again */
 		arm_timer();
 		/* Do something */
