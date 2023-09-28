@@ -29,6 +29,9 @@ static uint64_t cycle_count_wd=0;
 
 #define GIC_SPI_SEC_PHY_TIMER	27
 
+// Random number generator initialization, should only be called once.
+srand(time(NULL));
+
 uint32_t get_hi(uint64_t x){
 	return x >> 32;
 }
@@ -159,7 +162,6 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 		for (int i=0; i<200; i++){
 			cycle_count_wd += 1;
 		}
-		srand(time(NULL));   // Initialization, should only be called once.
 		int r = rand();
 	}
 
