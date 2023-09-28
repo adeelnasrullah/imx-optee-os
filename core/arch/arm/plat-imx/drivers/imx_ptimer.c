@@ -9,9 +9,7 @@
 #include <initcall.h>
 #include <kernel/interrupt.h>
 #include <mm/core_memprot.h>
-
-#include <time.h>
-#include <stdlib.h>
+#include <rng_support.h>
 
 /* Timer countdown/delay argument for the target calibration periodicity */
 static uint64_t timer_val, compare_value;
@@ -159,7 +157,8 @@ static enum itr_return arm_ptimer_it_handler(struct itr_handler *handler __unuse
 		for (int i=0; i<200; i++){
 			cycle_count_wd += 1;
 		}
-		int r = rand();
+		uint8_t buff[16];
+		hw_get_random_bytes((void*) buff, 16);
 	}
 
 	return ITRR_HANDLED;
@@ -192,9 +191,6 @@ static TEE_Result init_arm_ptimer_timer(void)
 
 	// set timer to fire after given time in milli-seconds
 	arm_timer_with_period(100);
-
-	// Random number generator initialization, should only be called once.
-	srand(time(NULL));
 
 	return TEE_SUCCESS;
 }
