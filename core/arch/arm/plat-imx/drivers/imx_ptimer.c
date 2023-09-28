@@ -29,9 +29,6 @@ static uint64_t cycle_count_wd=0;
 
 #define GIC_SPI_SEC_PHY_TIMER	27
 
-// Random number generator initialization, should only be called once.
-srand(time(NULL));
-
 uint32_t get_hi(uint64_t x){
 	return x >> 32;
 }
@@ -195,6 +192,9 @@ static TEE_Result init_arm_ptimer_timer(void)
 
 	// set timer to fire after given time in milli-seconds
 	arm_timer_with_period(100);
+
+	// Random number generator initialization, should only be called once.
+	srand(time(NULL));
 
 	return TEE_SUCCESS;
 }
