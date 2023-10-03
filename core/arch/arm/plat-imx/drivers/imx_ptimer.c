@@ -190,7 +190,7 @@ static TEE_Result init_arm_ptimer_timer(void)
 	IMSG("Global Timer Interrupt Registered !!!");
 
 	// set timer to fire after given time in milli-seconds
-	arm_timer_with_period(10);
+	arm_timer_with_period(1);
 
 	return TEE_SUCCESS;
 }
