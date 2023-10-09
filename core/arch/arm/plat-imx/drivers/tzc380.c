@@ -53,15 +53,20 @@ void write_ptimer_ctl(uint32_t val){
 static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 {
 	uint32_t r=0;
-        asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
-	DMSG("Request received. CPU cycle count: %u", r);
-	DMSG("TZC permission failure");
+    asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
+	//DMSG("Request received. CPU cycle count: %u", r);
+	//DMSG("TZC permission failure");
 	//EMSG("TZC permission failure");
 	//tzc_fail_dump();
 
+	// overall cycles consumed (calculated in the passive-mode-daemon.c)
+	for(int i=0; i < 3250; i++){
+		r += 1;
+	}
+
 	tzc_int_clear();
 	write_ptimer_ctl(PTIMER_BOOT_PRE_SCALER | PTIMER_CTL_INT_ENABLE);
-	DMSG("Interrupt Cleared. Likely returned from the handler.");
+	//DMSG("Interrupt Cleared. Likely returned from the handler.");
 
 	return ITRR_HANDLED;
 }
