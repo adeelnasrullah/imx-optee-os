@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <trace.h>
 #include <kernel/interrupt.h>
+#include <sm/sm.h>
 
 /*
  * TZASC2_BASE is asserted non null when used.
@@ -38,11 +39,13 @@ register_phys_mem(MEM_AREA_IO_SEC, TZASC_BASE, TZASC_SIZE);
 static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 {
 	uint32_t r=0;
-    	asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
+	asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
 	//DMSG("Request received. CPU cycle count: %u", r);
 	//DMSG("TZC permission failure");
 	//EMSG("TZC permission failure");
 	//tzc_fail_dump();
+	struct sm_nsec_ctx *nsec_ctx = sm_get_nsec_ctx();
+	DMSG("Request received. timelock: %u, cycle_count: %u", nsec_ctx->r1, nsec_ctx->r3);
 
 	// overall cycles consumed (calculated in the passive-mode-daemon.c)
 	for(int i=0; i < 2000; i++){
