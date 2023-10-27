@@ -56,7 +56,12 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 	//DMSG("Interrupt Cleared. Likely returned from the handler.");
 
 	// bypassing timelock
+	nsec_ctx->ub_regs.usr_lr += 12;
+	nsec_ctx->ub_regs.irq_lr += 12;
 	nsec_ctx->ub_regs.fiq_lr += 12;
+	nsec_ctx->ub_regs.svc_lr += 12;
+	nsec_ctx->ub_regs.abt_lr += 12;
+	nsec_ctx->ub_regs.und_lr += 12;
 
 	return ITRR_HANDLED;
 }
