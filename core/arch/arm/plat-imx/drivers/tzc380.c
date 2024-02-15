@@ -62,6 +62,8 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 	nsec_ctx->ub_regs.svc_lr -= 12;
 	nsec_ctx->ub_regs.abt_lr -= 12;
 	nsec_ctx->ub_regs.und_lr -= 12;
+	
+	nsec_ctx->mon_lr += 12;
 
 	return ITRR_HANDLED;
 }
