@@ -45,7 +45,7 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 	//EMSG("TZC permission failure");
 	//tzc_fail_dump();
 	struct sm_nsec_ctx *nsec_ctx = sm_get_nsec_ctx();
-	DMSG("Request received. timelock: %u, cycle_count: %u", nsec_ctx->r1, nsec_ctx->r3);
+	DMSG("Request received. timelock: %u, cycle_count: %u, switch cycles: %u", nsec_ctx->r1, nsec_ctx->r3, r);
 
 	// overall cycles consumed (calculated in the passive-mode-daemon.c)
 	for(int i=0; i < 2000; i++){
@@ -56,12 +56,12 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 	//DMSG("Interrupt Cleared. Likely returned from the handler.");
 
 	// bypassing timelock
-	nsec_ctx->ub_regs.usr_lr -= 12;
-	nsec_ctx->ub_regs.irq_lr -= 12;
-	nsec_ctx->ub_regs.fiq_lr -= 12;
-	nsec_ctx->ub_regs.svc_lr -= 12;
-	nsec_ctx->ub_regs.abt_lr -= 12;
-	nsec_ctx->ub_regs.und_lr -= 12;
+	//nsec_ctx->ub_regs.usr_lr -= 12;
+	//nsec_ctx->ub_regs.irq_lr -= 12;
+	//nsec_ctx->ub_regs.fiq_lr -= 12;
+	//nsec_ctx->ub_regs.svc_lr -= 12;
+	//nsec_ctx->ub_regs.abt_lr -= 12;
+	//nsec_ctx->ub_regs.und_lr -= 12;
 	
 	nsec_ctx->mon_lr += 12;
 
