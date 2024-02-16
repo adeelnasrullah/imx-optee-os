@@ -38,7 +38,7 @@ register_phys_mem(MEM_AREA_IO_SEC, TZASC_BASE, TZASC_SIZE);
 // later additions
 static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 {
-	//uint32_t r=0;
+	uint32_t r=0;
 	//asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
 	//DMSG("Request received. CPU cycle count: %u", r);
 	//DMSG("TZC permission failure");
@@ -49,7 +49,7 @@ static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 
 	// overall cycles consumed (calculated in the passive-mode-daemon.c)
 	for(int i=0; i < 2000; i++){
-	//	r += 1;
+		r += 1;
 	}
 
 	tzc_int_clear();
