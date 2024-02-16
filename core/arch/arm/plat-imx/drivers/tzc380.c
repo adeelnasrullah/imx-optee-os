@@ -38,14 +38,14 @@ register_phys_mem(MEM_AREA_IO_SEC, TZASC_BASE, TZASC_SIZE);
 // later additions
 static enum itr_return tzc_it_handler(struct itr_handler *handler __unused)
 {
-	uint32_t r=0;
-	asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
+	//uint32_t r=0;
+	//asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
 	//DMSG("Request received. CPU cycle count: %u", r);
 	//DMSG("TZC permission failure");
 	//EMSG("TZC permission failure");
 	//tzc_fail_dump();
 	struct sm_nsec_ctx *nsec_ctx = sm_get_nsec_ctx();
-	DMSG("Request received. timelock: %u, cycle_count: %u, switch cycles: %u", nsec_ctx->r1, nsec_ctx->r3, r);
+	//DMSG("Request received. timelock: %u, cycle_count: %u, switch cycles: %u", nsec_ctx->r1, nsec_ctx->r3, r);
 
 	// overall cycles consumed (calculated in the passive-mode-daemon.c)
 	for(int i=0; i < 2000; i++){
